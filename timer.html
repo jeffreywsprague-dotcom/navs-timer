@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NAVS Sprint Timer</title>
+<style>
+:root{--navy:#012657;--gold:#FFBB00;--ground:#EEF2F8;--card:#fff;--line:#D9E0EC;--line2:#E7ECF4;--text:#0B1B33;--muted:#4F5D75;--soft:#E3EAF6;--input:#B8C4D8;--bad:#B42318;--good:#0B6B3A;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--ground)}
+body{color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+.app{max-width:520px;margin:0 auto;padding:12px 14px calc(28px + env(safe-area-inset-bottom,0px));padding-top:calc(12px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px}
+.hero{background:var(--navy);color:#fff;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+h1{margin:0;font-size:30px;line-height:1.05;font-weight:900;font-style:italic;text-transform:uppercase}
+.hm{margin:0;color:#D6DEEB;font-size:14px;line-height:1.4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 8px}
+h2{margin:0;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--navy)}
+.sub{font-size:13px;color:var(--muted)}
+.pad{padding:14px;display:flex;flex-direction:column;gap:10px}
+.btn{display:flex;align-items:center;justify-content:center;min-height:52px;width:100%;border:none;border-radius:12px;background:var(--gold);color:var(--navy);font-weight:800;font-size:17px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;padding:0 12px;text-decoration:none}
+.btn.ghost{background:var(--card);border:1.5px solid var(--input);font-size:15px;font-weight:700;letter-spacing:0;text-transform:none;min-height:48px}
+.btn.dark{background:var(--navy);color:#fff}
+.btn:disabled{opacity:.5}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:0;min-height:44px;border-radius:10px;border:1.5px solid var(--input);background:var(--card);color:var(--navy);font-weight:700;font-size:14px;cursor:pointer;padding:0 6px}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+.text{min-height:48px;width:100%;border:1.5px solid var(--input);border-radius:10px;background:#fff;padding:10px 12px;font-size:16px}
+textarea.text{min-height:84px;font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all}
+.row{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 14px;border-top:1px solid var(--line2);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer}
+button.row:active{background:var(--soft)}
+.grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.name{font-weight:700;font-size:16px}
+.val{font-weight:800;font-size:20px;color:var(--navy);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--soft);font-size:12px;font-weight:700;color:var(--text)}
+.tag.cam{background:var(--gold);color:var(--navy)}
+.msg{font-size:14px;font-weight:600;margin:0}
+.msg.bad{color:var(--bad)} .msg.good{color:var(--good)}
+.note{font-size:13px;color:var(--muted);line-height:1.45;margin:0}
+.camwrap{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:4/3}
+.camwrap.small{aspect-ratio:16/7}
+.camwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.camline{position:absolute;top:0;bottom:0;left:50%;width:0;border-left:3px solid var(--gold);box-shadow:0 0 0 1px rgba(0,0,0,.5);pointer-events:none}
+.camwrap.hit .camline{border-color:#3DDC84}
+.meter{position:relative;height:14px;border-radius:7px;background:var(--soft);overflow:hidden}
+.meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--navy)}
+.meter b{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--bad)}
+.clock{font-size:76px;font-weight:900;line-height:1;text-align:center;font-variant-numeric:tabular-nums;color:var(--navy);padding:6px 0}
+.big{min-height:150px;font-size:44px;border-radius:20px}
+.big.stop{background:var(--bad);color:#fff}
+.back{background:none;border:1.5px solid #3A5A92;color:#fff;border-radius:10px;min-height:40px;padding:0 14px;font-weight:700;cursor:pointer}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rm{min-height:36px;padding:0 10px;border-radius:8px;border:1.5px solid var(--input);background:#fff;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.rm.arm{border-color:var(--bad);color:var(--bad)}
+input[type=range]{width:100%}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<video id="vid" playsinline muted autoplay style="display:none"></video>
+<script>
+(function(){
+"use strict";
+/* ================= storage + state ================= */
+var KEY = "navs-timer-v1";
+var DEFAULT_TESTS = ["Fly 30m","30m Standing Start"];
+var S = { view:"home", roster:null, attempts:[], test:"", group:"All", q:"", who:null, run:null, cam:{on:false, ready:false, err:"", need:0.25, level:0}, minTime:2, msg:"", msgKind:"", arm:null, showCode:false, pasteOpen:false };
+function load(){ try { var d = JSON.parse(localStorage.getItem(KEY)); if (d){ S.roster=d.roster||null; S.attempts=d.attempts||[]; S.test=d.test||""; if (d.need) S.cam.need=d.need; if (d.minTime) S.minTime=d.minTime; S.cam.want=!!d.camWant; } } catch(e){} }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify({roster:S.roster, attempts:S.attempts, test:S.test, need:S.cam.need, minTime:S.minTime, camWant:!!S.cam.want})); } catch(e){} }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function today(){ var t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
+function b64e(s){ return btoa(unescape(encodeURIComponent(s))); }
+function b64d(s){ return decodeURIComponent(escape(atob(s))); }
+function tests(){ return S.roster && S.roster.t && S.roster.t.length ? S.roster.t : DEFAULT_TESTS; }
+function athletes(){ return S.roster ? S.roster.a : []; }
+function isGo(){ return !/fly/i.test(S.test); }
+function fmt(v){ return Number(v).toFixed(2); }
+
+/* ================= roster in ================= */
+function readRoster(code){
+  code = String(code||"").trim().replace(/^#/,"");
+  if (code.indexOf("NAVS1:")!==0) return false;
+  try {
+    var d = JSON.parse(b64d(code.slice(6)));
+    if (!d || !Array.isArray(d.a)) return false;
+    S.roster = { t:(d.t||[]).map(String), a:d.a.map(function(r){ return {email:String(r[0]||"").toLowerCase(), name:String(r[1]||""), event:String(r[2]||"")}; }).filter(function(a){ return a.name; }) };
+    if (tests().indexOf(S.test)<0) S.test = tests()[0];
+    save(); return true;
+  } catch(e){ return false; }
+}
+
+/* ================= camera finish line ================= */
+var vid = document.getElementById("vid"), cv = document.createElement("canvas"), W = 24, H = 120;
+cv.width = W; cv.height = H;
+var ctx = cv.getContext("2d", {willReadFrequently:true}), bg = null, stream = null, lastFrameAt = 0;
+var THRESH = 22; // how different a pixel row must be from the empty lane to count as "blocked"
+function camStart(){
+  S.cam.err = "";
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ S.cam.err = "This browser can’t open the camera here. The page must be opened from an https link. Tap timing still works."; S.cam.on=false; render(); return; }
+  navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:"environment"}, width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:60}}}).then(function(st){
+    stream = st; vid.srcObject = st; S.cam.on = true; S.cam.want = true; bg = null; save();
+    var p = vid.play(); if (p && p.catch) p.catch(function(){});
+    S.cam.ready = true; pump(); render();
+  }).catch(function(e){
+    S.cam.on=false; S.cam.ready=false;
+    S.cam.err = (e && e.name==="NotAllowedError") ? "Camera permission was blocked. Allow the camera for this site in the browser settings, then try again." : "Couldn’t start the camera ("+((e&&e.name)||"error")+"). Tap timing still works.";
+    render();
+  });
+}
+function camStop(){ if (stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } vid.srcObject=null; S.cam.on=false; S.cam.ready=false; S.cam.want=false; save(); }
+function pump(){
+  if (!stream) return;
+  if (vid.requestVideoFrameCallback) vid.requestVideoFrameCallback(function(now, meta){ frame((meta && meta.captureTime) || now); pump(); });
+  else requestAnimationFrame(function(){ frame(performance.now()); pump(); });
+}
+function frame(t){
+  var vw = vid.videoWidth, vh = vid.videoHeight; if (!vw || !vh) return;
+  lastFrameAt = t;
+  var sw = Math.max(8, Math.round(vw*0.04));
+  ctx.drawImage(vid, Math.round(vw/2 - sw/2), 0, sw, vh, 0, 0, W, H);
+  var px = ctx.getImageData(0,0,W,H).data, n = W*H, g = new Float32Array(n), i, sum = 0;
+  for (i=0;i<n;i++){ g[i] = (px[i*4]+px[i*4+1]+px[i*4+2])/3; }
+  if (!bg){ bg = g; S.cam.level = 0; paintMeter(); return; }
+  for (i=0;i<n;i++) sum += g[i]-bg[i];
+  var off = sum/n, rows = 0, r, c, d;                 // "off" cancels overall brightness flicker from gym lights
+  for (r=0;r<H;r++){ d = 0; for (c=0;c<W;c++){ d += Math.abs(g[r*W+c]-bg[r*W+c]-off); } if (d/W > THRESH) rows++; }
+  var level = rows/H; S.cam.level = level;
+  var R = S.run;
+  if (R && R.state==="running" && R.useCam && (t - R.t0) >= S.minTime*1000 && level >= S.cam.need){ finish(t, true); }
+  else if (level < S.cam.need*0.4){ for (i=0;i<n;i++) bg[i] = bg[i]*0.92 + g[i]*0.08; }  // keep learning the empty lane
+  paintMeter();
+}
+function paintMeter(){
+  var m = document.getElementById("meter"); if (m){ m.firstChild.style.width = Math.min(100, Math.round(S.cam.level*100))+"%"; }
+  var w = document.getElementById("camwrap"); if (w) w.classList.toggle("hit", S.cam.level >= S.cam.need);
+}
+function attachPreview(){
+  var slot = document.getElementById("camslot"); if (!slot || !stream) return;
+  var v = document.createElement("video"); v.muted = true; v.playsInline = true; v.setAttribute("playsinline",""); v.autoplay = true; v.srcObject = stream;
+  slot.insertBefore(v, slot.firstChild); var p = v.play(); if (p && p.catch) p.catch(function(){});
+}
+function camBlock(small){
+  if (!S.cam.on) return "";
+  return '<div class="camwrap'+(small?' small':'')+'" id="camwrap"><div id="camslot" style="position:absolute;inset:0"></div><div class="camline"></div></div>'+
+    '<div class="meter" id="meter" aria-hidden="true"><i></i><b style="left:'+Math.round(S.cam.need*100)+'%"></b></div>';
+}
+
+/* ================= sound ================= */
+var ac = null;
+function beep(f, ms){ try { ac = ac || new (window.AudioContext||window.webkitAudioContext)(); var o = ac.createOscillator(), g = ac.createGain(); o.frequency.value=f; g.gain.value=.15; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+ms/1000); } catch(e){} }
+var wake = null;
+function keepAwake(){ try { if (navigator.wakeLock && !wake) navigator.wakeLock.request("screen").then(function(w){ wake=w; w.addEventListener("release", function(){ wake=null; }); }).catch(function(){}); } catch(e){} }
+
+/* ================= running a rep ================= */
+var tick = null;
+function startRun(t){
+  var R = S.run; if (!R || R.state!=="ready") return;
+  R.state = "running"; R.t0 = t; R.useCam = S.cam.on; beep(880, 90); keepAwake(); render();
+  tick = setInterval(function(){ var el = document.getElementById("clock"); if (el && S.run && S.run.state==="running") el.textContent = ((performance.now()-S.run.t0)/1000).toFixed(1); }, 50);
+}
+function finish(t, byCam){
+  var R = S.run; if (!R || R.state!=="running") return;
+  clearInterval(tick);
+  R.state = "done"; R.v = Math.round((t - R.t0)/10)/100; R.cam = !!byCam;
+  beep(byCam?1320:660, 160); if (navigator.vibrate) navigator.vibrate(80);
+  render();
+}
+function keep(){
+  var R = S.run, a = S.who;
+  S.attempts.push({id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), email:a.email, name:a.name, test:S.test, date:today(), v:R.v, cam:R.cam});
+  save();
+}
+function mine(a){ return S.attempts.filter(function(x){ return x.test===S.test && x.name===a.name && x.email===a.email && x.date===today(); }); }
+function best(list){ return list.length ? Math.min.apply(null, list.map(function(x){ return x.v; })) : null; }
+
+/* ================= results out ================= */
+function resultsCode(){ return "NAVSR1:"+b64e(JSON.stringify({rows:S.attempts.filter(function(x){ return x.email; }).map(function(x){ return [x.email, x.test, x.date, x.v, x.id]; })})); }
+function resultsTable(){ return "Name\tTest\tDate\tTime (s)\tTimed by\n"+S.attempts.map(function(x){ return [x.name, x.test, x.date, fmt(x.v), x.cam?"camera":"tap"].join("\t"); }).join("\n"); }
+function copy(text, okMsg){
+  function done(){ S.msg = okMsg; S.msgKind="good"; render(); }
+  function manual(){ S.msg = "Couldn’t copy automatically. Press and hold in the box, Select All, then Copy."; S.msgKind="bad"; render(); var b = document.getElementById("codebox"); if (b){ b.focus(); b.select(); } }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(manual); else manual();
+}
+
+/* ================= views ================= */
+function vHome(){
+  var n = athletes().length, t = tests();
+  if (t.indexOf(S.test)<0) S.test = t[0];
+  var roster = n ? '<p class="msg good">'+n+' athletes loaded from the team Sheet.</p>' : '<p class="note">No roster yet. In NAVS Lift, open My Numbers → Coach: enter test results → Sprint timer, and use “Open the timer” or copy the roster code and paste it here.</p>';
+  return '<section class="hero"><span class="eyebrow">NAVS Indoor Track &amp; Field</span><h1>Sprint Timer</h1><p class="hm">Tap a name, start the clock, and the phone at the finish line stops it.</p></section>'+
+    '<section class="card"><div class="card-h"><h2>1 · Roster</h2></div><div class="pad">'+roster+
+      (S.pasteOpen ? '<textarea class="text" id="rpaste" placeholder="Paste the roster code (starts with NAVS1:)"></textarea><button class="btn ghost" data-a="rload">Load this roster</button>' : '<button class="btn ghost" data-a="rpaste">'+(n?'Replace the roster':'Paste a roster code')+'</button>')+
+      (S.rmsg ? '<p class="msg bad" role="alert">'+esc(S.rmsg)+'</p>' : '')+
+      (!n ? '<div style="display:flex;gap:8px"><input class="text" id="adhoc" placeholder="Or type a name to add"><button class="btn ghost" style="width:auto;padding:0 16px" data-a="adhoc">Add</button></div>' : '')+'</div></section>'+
+    '<section class="card"><div class="card-h"><h2>2 · Test</h2></div><div class="pad"><div class="seg">'+t.map(function(x){ return '<button data-a="test" data-v="'+esc(x)+'" aria-pressed="'+(x===S.test)+'">'+esc(x)+'</button>'; }).join("")+'</div>'+
+      '<p class="note">'+(isGo() ? 'Standing start: tap GO as you say “Go”. The time includes the athlete’s reaction.' : 'Flying start: tap START the moment the athlete reaches the first cone.')+'</p></div></section>'+
+    '<section class="card"><div class="card-h"><h2>3 · Finish line camera</h2><span class="sub">'+(S.cam.on?'On':'Off — tap timing')+'</span></div><div class="pad">'+
+      (S.cam.on ? camBlock(false)+
+        '<p class="note">Put the phone on a tripod at chest height, level with the finish line, so the gold line sits on the finish. The bar jumps when someone crosses; the camera stops the clock when the bar passes the red mark. Walk through it to check.</p>'+
+        '<label class="sub" for="need">How much of the picture a runner must fill to stop the clock: <b id="needv">'+Math.round(S.cam.need*100)+'%</b></label><input id="need" type="range" min="8" max="60" step="1" value="'+Math.round(S.cam.need*100)+'">'+
+        '<label class="sub" for="mint">Ignore the camera for the first <b id="mintv">'+S.minTime.toFixed(1)+'</b> seconds of each run</label><input id="mint" type="range" min="0.5" max="5" step="0.5" value="'+S.minTime+'">'+
+        '<button class="btn ghost" data-a="camoff">Turn the camera off</button>'
+      : '<p class="note">With the camera off, you stop the clock by tapping. With it on, the phone stops the clock when the runner crosses the line.</p><button class="btn dark" data-a="camon">Turn on the finish camera</button>')+
+      (S.cam.err ? '<p class="msg bad" role="alert">'+esc(S.cam.err)+'</p>' : '')+'</div></section>'+
+    '<button class="btn" data-a="list"'+(n?'':' disabled')+'>Start timing</button>'+
+    (S.attempts.length ? '<button class="btn ghost" data-a="results">Results ('+S.attempts.length+' saved)</button>' : '');
+}
+var GROUPS = ["All","Distance","Sprints","Jumps","Throws"];
+function vList(){
+  var q = S.q.toLowerCase();
+  var list = athletes().filter(function(a){ return (S.group==="All" || a.event===S.group) && (!q || a.name.toLowerCase().indexOf(q)>=0); });
+  return '<section class="hero"><div class="top"><span class="eyebrow">'+esc(S.test)+' · '+(S.cam.on?'camera finish':'tap finish')+'</span><button class="back" data-a="home">Setup</button></div><h1>Who’s up?</h1></section>'+
+    '<input class="text" id="q" type="search" placeholder="Search a name" value="'+esc(S.q)+'">'+
+    '<div class="seg">'+GROUPS.map(function(g){ return '<button data-a="group" data-v="'+g+'" aria-pressed="'+(S.group===g)+'">'+g+'</button>'; }).join("")+'</div>'+
+    '<section class="card" id="alist">'+listRows(list)+'</section>'+
+    '<button class="btn ghost" data-a="results">Results ('+S.attempts.length+' saved)</button>';
+}
+function listRows(list){
+  return list.map(function(a){
+    var m = mine(a), b = best(m);
+    return '<button class="row" data-a="pick" data-v="'+athletes().indexOf(a)+'"><span class="grow"><span class="name">'+esc(a.name)+'</span><span class="sub">'+esc(a.event||"")+(m.length?' · '+m.length+' run'+(m.length===1?'':'s')+' today':'')+'</span></span>'+(b!=null?'<span class="val">'+fmt(b)+'</span>':'<span class="sub">—</span>')+'</button>';
+  }).join("") || '<p class="note" style="padding:14px">No one matches.</p>';
+}
+function vRun(){
+  var R = S.run, a = S.who, m = mine(a), b = best(m), body;
+  if (R.state==="ready"){
+    body = (S.cam.on ? camBlock(true) : '')+
+      '<button class="btn big" id="go">'+(isGo()?'GO':'START')+'</button>'+
+      '<p class="note" style="text-align:center">'+(isGo()?'Tap as you say “Go”.':'Tap the moment they reach the first cone.')+' '+(S.cam.on?'The camera stops the clock at the finish.':'Tap again when they cross the finish.')+'</p>';
+  } else if (R.state==="running"){
+    body = '<div class="clock" id="clock">0.0</div>'+(R.useCam ? camBlock(true) : '')+
+      '<button class="btn big stop" id="stop">'+(R.useCam?'STOP (backup)':'STOP')+'</button>'+
+      '<button class="btn ghost" data-a="cancel">Cancel this run</button>';
+  } else {
+    body = '<div class="clock">'+fmt(R.v)+'</div><p style="text-align:center;margin:0"><span class="tag'+(R.cam?' cam':'')+'">'+(R.cam?'Stopped by camera':'Stopped by tap')+'</span>'+(b!=null && R.v<b?' <span class="tag cam">Best today</span>':'')+'</p>'+
+      '<button class="btn" data-a="savenext">Save · next athlete</button>'+
+      '<button class="btn dark" data-a="saveagain">Save · run '+esc(a.name.split(" ")[0])+' again</button>'+
+      '<button class="btn ghost" data-a="discard">Don’t save (bad run)</button>';
+  }
+  return '<section class="hero"><div class="top"><span class="eyebrow">'+esc(S.test)+'</span>'+(R.state==="running"?'':'<button class="back" data-a="list">Back</button>')+'</div><h1>'+esc(a.name)+'</h1>'+
+    '<p class="hm">'+(m.length ? 'Today: '+m.map(function(x){ return fmt(x.v); }).join(", ")+' · best '+fmt(b) : 'No runs saved today')+'</p></section>'+body;
+}
+function vResults(){
+  var by = {}, order = [];
+  S.attempts.forEach(function(x){ var k = x.test+"|"+x.name+"|"+x.email; if (!by[k]){ by[k]={name:x.name,test:x.test,list:[]}; order.push(k); } by[k].list.push(x); });
+  var noEmail = S.attempts.filter(function(x){ return !x.email; }).length;
+  var rows = order.map(function(k){
+    var g = by[k], b = best(g.list);
+    return '<div class="row" style="cursor:default;align-items:flex-start"><span class="grow"><span class="name">'+esc(g.name)+'</span><span class="sub">'+esc(g.test)+'</span>'+
+      g.list.map(function(x){ var arm = S.arm===x.id; return '<span style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="font-variant-numeric:tabular-nums;font-weight:700">'+fmt(x.v)+'</span><span class="tag'+(x.cam?' cam':'')+'">'+(x.cam?'camera':'tap')+'</span><span class="sub">'+esc(x.date)+'</span><button class="rm'+(arm?' arm':'')+'" data-a="del" data-v="'+x.id+'">'+(arm?'Tap again':'Remove')+'</button></span>'; }).join("")+
+      '</span><span class="val">'+fmt(b)+'</span></div>';
+  }).join("") || '<p class="note" style="padding:14px">Nothing saved yet.</p>';
+  return '<section class="hero"><div class="top"><span class="eyebrow">Results</span><button class="back" data-a="'+(athletes().length?'list':'home')+'">Back</button></div><h1>'+S.attempts.length+' runs saved</h1><p class="hm">Saved on this phone until you clear them.</p></section>'+
+    '<section class="card"><div class="card-h"><h2>Send to the team Sheet</h2></div><div class="pad">'+
+      '<p class="note">Copy the results code, then in NAVS Lift open My Numbers → Coach: enter test results → Sprint timer → paste it and tap Import. Importing the same runs twice is safe; duplicates are skipped.</p>'+
+      '<button class="btn" data-a="copycode"'+(S.attempts.length?'':' disabled')+'>Copy results code</button>'+
+      (S.showCode ? '<textarea class="text" readonly id="codebox">'+esc(resultsCode())+'</textarea>' : '')+
+      (noEmail ? '<p class="note">'+noEmail+' run(s) belong to names typed in by hand. Those can’t be imported; use the table copy for them.</p>' : '')+
+      '<button class="btn ghost" data-a="copytable"'+(S.attempts.length?'':' disabled')+'>Copy as a table (for Sheets or notes)</button>'+
+      (S.msg ? '<p class="msg '+S.msgKind+'" role="status">'+esc(S.msg)+'</p>' : '')+'</div></section>'+
+    '<section class="card"><div class="card-h"><h2>All runs</h2><span class="sub">Best on the right</span></div>'+rows+'</section>'+
+    '<button class="btn ghost" data-a="clear"'+(S.attempts.length?'':' disabled')+'>'+(S.arm==="ALL"?'Tap again to delete every run on this phone':'Clear all runs (after importing)')+'</button>';
+}
+function render(){
+  var V = {home:vHome, list:vList, run:vRun, results:vResults}[S.view];
+  document.getElementById("app").innerHTML = V();
+  attachPreview(); paintMeter();
+  var go = document.getElementById("go"); if (go) go.addEventListener("pointerdown", function(ev){ ev.preventDefault(); startRun(performance.now()); });
+  var st = document.getElementById("stop"); if (st) st.addEventListener("pointerdown", function(ev){ ev.preventDefault(); finish(performance.now(), false); });
+}
+function go(v){ S.view=v; S.msg=""; S.arm=null; S.showCode=false; render(); window.scrollTo(0,0); }
+
+/* ================= events ================= */
+document.addEventListener("click", function(ev){
+  var t = ev.target.closest("[data-a]"); if (!t || t.disabled) return;
+  var a = t.getAttribute("data-a"), v = t.getAttribute("data-v");
+  if (a==="home") go("home");
+  else if (a==="list") { S.run=null; go("list"); }
+  else if (a==="results") go("results");
+  else if (a==="test") { S.test=v; save(); render(); }
+  else if (a==="group") { S.group=v; render(); }
+  else if (a==="rpaste") { S.pasteOpen=true; render(); }
+  else if (a==="rload") { var ok = readRoster(document.getElementById("rpaste").value); S.pasteOpen=!ok; S.rmsg = ok ? "" : "That doesn’t look like a roster code. It should start with NAVS1:"; render(); }
+  else if (a==="adhoc") { var el=document.getElementById("adhoc"), nm=el.value.trim(); if (nm){ S.roster = S.roster || {t:[], a:[]}; S.roster.a.push({email:"", name:nm, event:""}); save(); render(); } }
+  else if (a==="camon") camStart();
+  else if (a==="camoff") { camStop(); render(); }
+  else if (a==="pick") { S.who = athletes()[Number(v)]; S.run = {state:"ready"}; keepAwake(); go("run"); }
+  else if (a==="cancel") { clearInterval(tick); S.run = {state:"ready"}; render(); }
+  else if (a==="savenext") { keep(); S.run=null; S.q=""; go("list"); }
+  else if (a==="saveagain") { keep(); S.run = {state:"ready"}; render(); }
+  else if (a==="discard") { S.run = {state:"ready"}; render(); }
+  else if (a==="del") { if (S.arm!==v){ S.arm=v; render(); } else { S.attempts = S.attempts.filter(function(x){ return x.id!==v; }); S.arm=null; save(); render(); } }
+  else if (a==="clear") { if (S.arm!=="ALL"){ S.arm="ALL"; render(); } else { S.attempts=[]; S.arm=null; save(); render(); } }
+  else if (a==="copycode") { S.showCode=true; copy(resultsCode(), "Results code copied. Paste it into NAVS Lift."); }
+  else if (a==="copytable") { copy(resultsTable(), "Table copied."); }
+});
+document.addEventListener("input", function(ev){
+  var id = ev.target.id;
+  if (id==="q"){ S.q = ev.target.value; var q=S.q.toLowerCase(); document.getElementById("alist").innerHTML = listRows(athletes().filter(function(a){ return (S.group==="All"||a.event===S.group) && (!q || a.name.toLowerCase().indexOf(q)>=0); })); }
+  else if (id==="need"){ S.cam.need = Number(ev.target.value)/100; document.getElementById("needv").textContent = ev.target.value+"%"; var m=document.querySelector("#meter b"); if (m) m.style.left = ev.target.value+"%"; save(); }
+  else if (id==="mint"){ S.minTime = Number(ev.target.value); document.getElementById("mintv").textContent = S.minTime.toFixed(1); save(); }
+});
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState==="visible") keepAwake(); });
+
+/* ================= boot ================= */
+load();
+if (location.hash && location.hash.indexOf("#NAVS1:")===0){ readRoster(location.hash); try { history.replaceState(null, "", location.pathname+location.search); } catch(e){} }
+if (tests().indexOf(S.test)<0) S.test = tests()[0];
+window.__timer = S;
+render();
+})();
+</script>
+</body>
+</html>
